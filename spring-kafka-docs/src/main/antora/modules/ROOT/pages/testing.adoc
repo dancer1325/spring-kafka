@@ -1,30 +1,33 @@
 [[testing]]
 = Testing Applications
 
-The `spring-kafka-test` jar contains some useful utilities to assist with testing your applications.
+* `spring-kafka-test` jar
+    ** contains utilities -- for -- supporting testing
 
 [[ekb]]
 == Embedded Kafka Broker
 
-Two implementations are provided:
-
-* `EmbeddedKafkaZKBroker` - legacy implementation which starts an embedded `Zookeeper` instance (which is still the default when using `EmbeddedKafka`).
-* `EmbeddedKafkaKraftBroker` - uses `Kraft` instead of `Zookeeper` in combined controller and broker modes (since 3.1).
-
-There are several techniques to configure the broker as discussed in the following sections.
+* built-in implementations
+    ** `EmbeddedKafkaZKBroker`
+        *** legacy implementation
+        *** starts an embedded `Zookeeper` instance
+            **** default | using `EmbeddedKafka`
+    ** `EmbeddedKafkaKraftBroker`
+        *** uses `Kraft`
+            **** != `Zookeeper`
+        *** v3.1+
 
 [[ktu]]
 == KafkaTestUtils
 
-`org.springframework.kafka.test.utils.KafkaTestUtils` provides a number of static helper methods to consume records, retrieve various record offsets, and others.
-Refer to its https://docs.spring.io/spring-kafka/docs/current/api/org/springframework/kafka/test/utils/KafkaTestUtils.html[Javadocs] for complete details.
-
-[[junit]]
-== JUnit
-
-`org.springframework.kafka.test.utils.KafkaTestUtils` also provides some static methods to set up producer and consumer properties.
-The following listing shows those method signatures:
-
+* `org.springframework.kafka.test.utils.KafkaTestUtils`
+    ** == static helper methods / allows
+        *** consuming records,
+        *** retrieving various record offsets
+        *** setting up producer and consumer properties
+        *** ...
+* check https://docs.spring.io/spring-kafka/docs/current/api/org/springframework/kafka/test/utils/KafkaTestUtils.html[Javadocs]
+* _Example1:_
 [source, java]
 ----
 /**
@@ -44,6 +47,12 @@ public static Map<String, Object> consumerProps(String group, String autoCommit,
  */
 public static Map<String, Object> producerProps(EmbeddedKafkaBroker embeddedKafka) { ... }
 ----
+
+[[junit]]
+== JUnit
+
+* TODO:
+
 
 [NOTE]
 ====
