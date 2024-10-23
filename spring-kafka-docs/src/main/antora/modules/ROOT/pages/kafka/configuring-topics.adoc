@@ -5,7 +5,7 @@
     ** 👀if you use Spring Boot -> automatically a `KafkaAdmin` bean is automatically registered 👀
     ** way to define these beans
         *** add a `NewTopic` `@Bean` / EACH topic | application context
-        *** | Kafka v2.3+, -- via -- `TopicBuilder`
+        *** | spring-kafka v2.3+, -- via -- `TopicBuilder`
             **** _Example:_
 
 [tabs]
@@ -25,7 +25,7 @@ include::{kotlin-examples}/topics/Config.kt[tag=topicBeans]
 ----
 ======
 
-* | Kafka v2.6+ & Kafka Broker v2.4.0+ -> you can (check https://cwiki.apache.org/confluence/display/KAFKA/KIP-464%3A+Defaults+for+AdminClient%23createTopic[KIP-464]) omit
+* | spring-kafka v2.6+ & Kafka Broker v2.4.0+ -> you can (check https://cwiki.apache.org/confluence/display/KAFKA/KIP-464%3A+Defaults+for+AdminClient%23createTopic[KIP-464]) omit
     ** `partitions()`
         *** -> broker defaults will be applied
     ** `replicas()`
@@ -48,7 +48,7 @@ include::{kotlin-examples}/topics/Config.kt[tag=brokerProps]
 ----
 ======
 
-* | Kafka v2.7+
+* | spring-kafka v2.7+
     ** you can declare multiple `NewTopic`+++S+++ | 1! `KafkaAdmin.NewTopics` bean definition
 +
 [tabs]
@@ -94,10 +94,10 @@ private KafkaAdmin admin;
         *** if you want to consider as fatal == context fails to initialize -> set `KafkaAdmin.fatalIfBrokerNotAvailable=true`
     ** if you want to try again later -> programmatically invoke `KafkaAdmin.initialize()`
 
-* | Kafka v1.0.0+
+* | spring-kafka v1.0.0+
     ** if an existing topic's partitions < `NewTopic.numPartitions` -> KafkaAdmin increases the # of partitions
 
-* | Kafka v2.9.10+, v3.0.9+
+* | spring-kafka v2.9.10+, v3.0.9+
     ** you -- can provide a -- `Predicate<NewTopic>`
         *** uses
             **** determine whether a particular `NewTopic` bean -- should be considered for --
