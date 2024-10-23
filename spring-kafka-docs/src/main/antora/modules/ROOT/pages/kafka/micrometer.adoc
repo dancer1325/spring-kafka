@@ -91,26 +91,47 @@ A similar listener is provided for the `StreamsBuilderFactoryBean` - see xref:st
 [[observation]]
 == Micrometer Observation
 
-Using Micrometer for observation is now supported, since version 3.0, for the `KafkaTemplate` and listener containers.
+* requirements
+    ** spring-kafka v3.0+
+    ** set
+        *** `KafkaTemplate.observationEnabled=true`
+        *** `ContainerProperties.observationEnabled=true`
+        *** -> disable xref:kafka/micrometer.adoc[Micrometer Timers]
+            **** Reason: 🧠 timers -- will NOW be managed with -- EACH observation 🧠
+* uses
+    ** observation for
+        *** `KafkaTemplate`
+        *** listener containers
+* NOT support batch listener
+    ** Reason: 🧠 it would enable Micrometer Timers 🧠
+* check https://micrometer.io/docs/tracing[Micrometer Tracing]
+* 👀if you want to add tags | timers/traces -> configure a custom 👀
+    ** `KafkaTemplateObservationConvention` | template or
+    ** `KafkaListenerObservationConvention` | listener container
+* default implementations -- add -- the tags
+    ** `bean.name` / template observations
+    ** `listener.id` / containers
+* ways to provide completely new implementations
+    ** subclass of
+        *** `DefaultKafkaTemplateObservationConvention` or
+        *** `DefaultKafkaListenerObservationConvention`
+* xref:appendix/micrometer.adoc#observation-gen[default observations / are recorded]
 
-Set `observationEnabled` to `true` on the `KafkaTemplate` and `ContainerProperties` to enable observation; this will disable xref:kafka/micrometer.adoc[Micrometer Timers] because the timers will now be managed with each observation.
-
-IMPORTANT: Micrometer Observation does not support batch listener; this will enable Micrometer Timers
-
-Refer to https://micrometer.io/docs/tracing[Micrometer Tracing] for more information.
-
-To add tags to timers/traces, configure a custom `KafkaTemplateObservationConvention` or `KafkaListenerObservationConvention` to the template or listener container, respectively.
-
-The default implementations add the `bean.name` tag for template observations and `listener.id` tag for containers.
-
-You can either subclass `DefaultKafkaTemplateObservationConvention` or `DefaultKafkaListenerObservationConvention` or provide completely new implementations.
-
-See xref:appendix/micrometer.adoc#observation-gen[Micrometer Observation Documentation] for details of the default observations that are recorded.
-
-Starting with version 3.0.6, you can add dynamic tags to the timers and traces, based on information in the consumer or producer records.
-To do so, add a custom `KafkaListenerObservationConvention` and/or `KafkaTemplateObservationConvention` to the listener container properties or `KafkaTemplate` respectively.
-The `record` property in both observation contexts contains the `ConsumerRecord` or `ProducerRecord` respectively.
-
-The sender and receiver contexts `remoteServiceName` properties are set to the Kafka `clusterId` property; this is retrieved by a `KafkaAdmin`.
-If, for some reason - perhaps lack of admin permissions, you cannot retrieve the cluster id, starting with version 3.1, you can set a manual `clusterId` on the `KafkaAdmin` and inject it into `KafkaTemplate` s and listener containers.
-When it is `null` (default), the admin will invoke the `describeCluster` admin operation to retrieve it from the broker.
+* | spring-kafka v3.0.6+
+    ** based on information | consumer or producer records -> you can add dynamic tags
+        *** |
+            **** timers
+            **** traces
+        *** -- via adding -- custom
+            **** `KafkaListenerObservationConvention` | listener container properties and/or
+            **** `KafkaTemplateObservationConvention` | `KafkaTemplate`
+        *** `record` property -- contains the -- `ConsumerRecord` or `ProducerRecord`
+* |sender & receiver contexts,
+    ** `remoteServiceName` properties = Kafka `clusterId` property
+        *** Kafka `clusterId` property -- is retrieved by a -- `KafkaAdmin`
+            **** if you can NOT retrieve the `clusterId` (_Example:_ lack of permissions) & spring-kafka v3.1+ -> you can
+                ***** set a manual `clusterId` | `KafkaAdmin`
+                ***** inject it |
+                    ****** `KafkaTemplate` s
+                    ****** listener containers
+            **** if `clusterId=null` (default) -> `KafkaAdmin` -- will invoke the -- `describeCluster` admin operation /  -- retrieve it from the -- broker
