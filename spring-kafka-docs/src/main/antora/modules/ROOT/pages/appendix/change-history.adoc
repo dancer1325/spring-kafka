@@ -522,9 +522,13 @@ See xref:streams.adoc#streams-config[Configuration] for more information.
 [[x27-admin]]
 === `KafkaAdmin` Changes
 
-New methods `createOrModifyTopics` and `describeTopics` have been added.
-`KafkaAdmin.NewTopics` has been added to facilitate configuring multiple topics in a single bean.
-See <<configuring-topics>> for more information.
+* New methods
+    ** `createOrModifyTopics(){}`
+    ** `describeTopics(){}`
+* `KafkaAdmin.NewTopics`
+    ** allows
+        *** 👀facilitating configuring multiple topics | 1! bean 👀
+* See <<configuring-topics>>
 
 [[x27-conv]]
 === `MessageConverter` Changes
@@ -1179,8 +1183,10 @@ See xref:kafka/headers.adoc[Message Headers] for more information.
 [[cb-1-2-and-1-3-creating-topics]]
 === Creating Topics
 
-The 0.11.0.0 client library provides an `AdminClient`, which you can use to create topics.
-The `KafkaAdmin` uses this client to automatically add topics defined as `@Bean` instances.
+* 0.11.0.0 client library -- provides an -- `AdminClient` /
+    ** uses
+        *** create topics
+        *** by `KafkaAdmin` -- to automatically add -- topics / defined as `@Bean` instances
 
 
 [[cb-1-2-and-1-3-support-for-kafka-timestamps]]
