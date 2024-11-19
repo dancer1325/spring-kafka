@@ -811,17 +811,25 @@ When this is true, the application fails to start if the broker is down; many us
 [[cb-2-2-and-2-3-producer-and-consumer-factory-changes]]
 === Producer and Consumer Factory Changes
 
-The `DefaultKafkaProducerFactory` can now be configured to create a producer per thread.
-You can also provide `Supplier<Serializer>` instances in the constructor as an alternative to either configured classes (which require no-arg constructors), or constructing with `Serializer` instances, which are then shared between all Producers.
-See xref:kafka/sending-messages.adoc#producer-factory[Using `DefaultKafkaProducerFactory`] for more information.
-
-The same option is available with `Supplier<Deserializer>` instances in `DefaultKafkaConsumerFactory`.
-See xref:kafka/receiving-messages/message-listener-container.adoc#kafka-container[Using `KafkaMessageListenerContainer`] for more information.
+* `DefaultKafkaProducerFactory`
+    ** allows
+        *** if you configure it -> create a producer / thread
+    ** different ways to configure
+        *** provide `Supplier<Serializer>` instances | constructor
+        *** configured classes (-> require no-arg constructors)
+        *** constructing -- via -- `Serializer` instances
+            **** -> shared between ALL Producers
+    ** see xref:kafka/sending-messages.adoc#producer-factory[Using `DefaultKafkaProducerFactory`]
+* `DefaultKafkaConsumerFactory`
+    ** ways to configure
+        *** provide `Supplier<Deserializer>` instances | constructor
+        *** SAME options as `DefaultKafkaProducerFactory`
+    ** see xref:kafka/receiving-messages/message-listener-container.adoc#kafka-container[Using `KafkaMessageListenerContainer`]
 
 [[cb-2-2-and-2-3-listener-container-changes]]
 === Listener Container Changes
 
-Previously, error handlers received `ListenerExecutionFailedException` (with the actual listener exception as the `cause`) when the listener was invoked using a listener adapter (such as `@KafkaListener` s).
+* TODO:Previously, error handlers received `ListenerExecutionFailedException` (with the actual listener exception as the `cause`) when the listener was invoked using a listener adapter (such as `@KafkaListener` s).
 Exceptions thrown by native `GenericMessageListener` s were passed to the error handler unchanged.
 Now a `ListenerExecutionFailedException` is always the argument (with the actual listener exception as the `cause`), which provides access to the container's `group.id` property.
 
