@@ -4,11 +4,21 @@
 [[overview]]
 == Overview
 
-Apache Kafka provides a high-level API for serializing and deserializing record values as well as their keys.
-It is present with the `org.apache.kafka.common.serialization.Serializer<T>` and
-`org.apache.kafka.common.serialization.Deserializer<T>` abstractions with some built-in implementations.
-Meanwhile, we can specify serializer and deserializer classes by using `Producer` or `Consumer` configuration properties.
-The following example shows how to do so:
+* Apache Kafka
+    ** provides a
+        *** high-level API -- for --
+            **** serializing
+                ***** record values
+                ***** keys
+                ***** / includes `org.apache.kafka.common.serialization.Serializer<T>` + implementations
+                ***** -- can be specified via using -- `Producer` configuration properties
+            **** deserializing
+                ***** record values
+                ***** keys
+                ***** / includes the `org.apache.kafka.common.serialization.Deserializer<T>` + implementations
+                ***** -- can be specified via using -- `Consumer` configuration properties
+
+* _Example:_ ways to specify serializing & deserializing
 
 [source, java]
 ----
@@ -19,6 +29,7 @@ props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
 props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 ----
 
+* TODO:
 For more complex or particular cases, the `KafkaConsumer` (and, therefore, `KafkaProducer`) provides overloaded
 constructors to accept `Serializer` and `Deserializer` instances for `keys` and `values`, respectively.
 
