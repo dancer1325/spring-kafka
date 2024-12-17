@@ -1,24 +1,37 @@
 [[retry-config]]
 = Configuration
 
-Starting with version 2.9, for default configuration, the `@EnableKafkaRetryTopic` annotation should be used in a `@Configuration` annotated class.
-This enables the feature to bootstrap properly and gives access to injecting some of the feature's components to be looked up at runtime.
+* | v2.9
+    ** | default configuration, SHOULD be used `@EnableKafkaRetryTopic` + `@Configuration` | SAME class ->
+        *** enable feature to bootstrap properly
+        *** gives access to injecting SOME of the feature's components / be looked up | runtime
+    ** if you want MORE advanced configuration of the feature's components & global features -> | 1 `@Configuration` class, extend `RetryTopicConfigurationSupport` & override appropriate methods
+        *** see xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings & Features]
+        *** 1 == NOT SEVERAL extensions
 
-NOTE: It is not necessary to also add `@EnableKafka`, if you add this annotation, because `@EnableKafkaRetryTopic` is meta-annotated with `@EnableKafka`.
+* `@EnableKafkaRetryTopic`
+    ** -- is meta-annotated with -- `@EnableKafka`
 
-Also, starting with that version, for more advanced configuration of the feature's components and global features, the `RetryTopicConfigurationSupport` class should be extended in a `@Configuration` class, and the appropriate methods overridden.
-For more details refer to xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings and Features].
-
-By default, the containers for the retry topics will have the same concurrency as the main container.
-Starting with version 3.0, you can set a different `concurrency` for the retry containers (either on the annotation, or in `RetryConfigurationBuilder`).
-
-IMPORTANT: Only one of the above techniques can be used, and only one `@Configuration` class can extend `RetryTopicConfigurationSupport`.
+* containers -- for the -- retry topics
+    ** by default, 's concurrency == MAIN container's concurrency
+    ** | v3.0, you can set a concurrency / != MAIN container's concurrency
+        *** ways
+            **** | annotation
+            **** | `RetryConfigurationBuilder`
 
 [[using-the-retryabletopic-annotation]]
 == Using the `@RetryableTopic` annotation
 
-To configure the retry topic and dlt for a `@KafkaListener` annotated method, you just have to add the `@RetryableTopic` annotation to it and Spring for Apache Kafka will bootstrap all the necessary topics and consumers with the default configurations.
+* goal
+    ** configure | `@KafkaListener` annotated method, the
+        *** retry topic
+        *** dlt
 
+* steps
+    ** | `@KafkaListener` ' class, add `@RetryableTopic`
+        *** Reason: 🧠Spring for Apache Kafka -- will bootstrap -- ALL the necessary topics & consumers / default configurations 🧠
+        *** _Example:_
++
 [source, java]
 ----
 @RetryableTopic(kafkaTemplate = "myRetryableTopicKafkaTemplate")
@@ -28,37 +41,9 @@ public void processMessage(MyPojo message) {
 }
 ----
 
-Since 3.2, `@RetryableTopic` support for @KafkaListener on a class would be:
-[source,java]
-----
-@RetryableTopic(listenerContainerFactory = "my-retry-topic-factory")
-@KafkaListener(topics = "my-annotated-topic")
-public class ClassLevelRetryListener {
-
-    @KafkaHandler
-    public void processMessage(MyPojo message) {
-        // ... message processing
-    }
-
-}
-----
-
-You can specify a method in the same class to process the dlt messages by annotating it with the `@DltHandler` annotation.
-If no DltHandler method is provided a default consumer is created which only logs the consumption.
-
-[source, java]
-----
-@DltHandler
-public void processMessage(MyPojo message) {
-    // ... message processing, persistence, etc
-}
-----
-
-NOTE: If you don't specify a kafkaTemplate name a bean with name `defaultRetryTopicKafkaTemplate` will be looked up.
-If no bean is found an exception is thrown.
-
-Starting with version 3.0, the `@RetryableTopic` annotation can be used as a meta-annotation on custom annotations; for example:
-
+        *** | v3.0, `@RetryableTopic` annotation -- can be used as a -- meta-annotation | custom annotations
+            **** _Example:_
++
 [source, java]
 ----
 @Target({ElementType.METHOD})
@@ -71,12 +56,47 @@ static @interface MetaAnnotatedRetryableTopic {
 
 }
 ----
+        *** | v3.2+,
+            **** configure DIFFERENTLY `@RetryableTopic`
+            **** DLT topic -- is specified, via -- `@DltHandler` | ANOTHER SAME class' method
+                ***** 👀if you do NOT specify it -> default consumer is created / ONLY logs the consumption 👀
+            **** _Example:_
++
+[source,java]
+----
+@RetryableTopic(listenerContainerFactory = "my-retry-topic-factory")
+@KafkaListener(topics = "my-annotated-topic")
+public class ClassLevelRetryListener {
+
+    @KafkaHandler
+    public void processMessage(MyPojo message) {
+        // ... message processing
+    }
+
+    // Specifying DLT handler
+    @DltHandler
+    public void processMessage(MyPojo message) {
+        // ... message processing, persistence, etc
+    }
+
+}
+----
+
+        *** 👀if you do NOT specify a `@RetryableTopic(kafkaTemplate=...)` -> bean with name `defaultRetryTopicKafkaTemplate` will be looked up 👀
+            **** if NO bean is found -> exception is thrown
 
 [[using-retrytopicconfiguration-beans]]
 == Using `RetryTopicConfiguration` beans
 
-You can also configure the non-blocking retry support by creating `RetryTopicConfiguration` beans in a `@Configuration` annotated class.
-
+* 💡`RetryTopicConfiguration` beans | `@Configuration` annotated class -> ANOTHER way to configure the non-blocking retry support 💡
+    ** 👀by default, create for ALL topics | methods annotated with `@KafkaListener`, -- via the default configurations --
+        *** retry topics + corresponding consumers
+        *** dlt topic + corresponding consumers 👀
+    ** requirements
+        *** `KafkaTemplate` instance
+        **** Reason: 🧠for message forwarding 🧠
+    ** _Example:_
++
 [source, java]
 ----
 @Bean
@@ -87,10 +107,9 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, Object> templa
 }
 ----
 
-This will create retry topics and a dlt, as well as the corresponding consumers, for all topics in methods annotated with `+++@+++KafkaListener` using the default configurations. The `KafkaTemplate` instance is required for message forwarding.
-
-To achieve more fine-grained control over how to handle non-blocking retrials for each topic, more than one `RetryTopicConfiguration` bean can be provided.
-
+    ** if you want to achieve MORE fine-grained control over how to handle non-blocking retrials / EACH topic -> declare >1 `RetryTopicConfiguration` bean
+        *** _Example:_
++
 [source, java]
 ----
 @Bean
@@ -116,13 +135,36 @@ public RetryTopicConfiguration myOtherRetryTopic(KafkaTemplate<String, MyOtherPo
 }
 ----
 
-NOTE: The retry topics' and dlt's consumers will be assigned to a consumer group with a group id that is the combination of the one which you provide in the `groupId` parameter of the `@KafkaListener` annotation with the topic's suffix.
-If you don't provide any they'll all belong to the same group, and rebalance on a retry topic will cause an unnecessary rebalance on the main topic.
+* retry topics' & dlt's consumers -- will be assigned to a -- consumer group /
+    ** group id == `@KafkaListener.groupId-topicSuffix`
++
+[source, java]
+----
+@KafkaListener(
+    topics = "orders-topic",
+    groupId = "order-processing-group"
+)
+public void processOrder(String order) {
+    // Process order logic
+}
+// ->
+// 1. Retry Topics & their auto-generated group IDs
+//    Topic: orders-topic-retry-1000
+//    Group ID: order-processing-group-retry-1000
+// 2. Dead Letter Topic:
+//    Topic: orders-topic-dlt
+//    Group ID: order-processing-group-dlt
+----
+        *** if `@KafkaListener.groupId` NOT specified ->
+            **** ALL retry topics & DLT belong to the SAME group
+            **** rebalance | retry topic -- will cause an -- UNNECESSARY rebalance | main topic
 
-IMPORTANT: If the consumer is configured with an xref:kafka/serdes.adoc#error-handling-deserializer[`ErrorHandlingDeserializer`], to handle deserialization exceptions, it is important to configure the `KafkaTemplate` and its producer with a serializer that can handle normal objects as well as raw `byte[]` values, which result from deserialization exceptions.
-The generic value type of the template should be `Object`.
-One technique is to use the `DelegatingByTypeSerializer`; an example follows:
-
+* 👀if the consumer -- is configured with an -- xref:kafka/serdes.adoc#error-handling-deserializer[`ErrorHandlingDeserializer`] -> configure the `KafkaTemplate` & its producer -- with a -- serializer /
+    ** can handle 👀
+        *** normal objects &
+        *** raw `byte[]` values / -- result from -- deserialization exceptions
+    ** _Example:_ via `DelegatingByTypeSerializer`
++
 [source, java]
 ----
 @Bean
@@ -132,27 +174,51 @@ public ProducerFactory<String, Object> producerFactory() {
                MyNormalObject.class, new JsonSerializer<Object>())));
 }
 
+// template's generic value type -- should be -- `Object`
 @Bean
 public KafkaTemplate<String, Object> kafkaTemplate() {
     return new KafkaTemplate<>(producerFactory());
 }
 ----
 
-IMPORTANT: Multiple `@KafkaListener` annotations can be used for the same topic with or without manual partition assignment along with non-blocking retries, but only one configuration will be used for a given topic.
-It's best to use a single `RetryTopicConfiguration` bean for configuration of such topics; if multiple `@RetryableTopic` annotations are being used for the same topic, all of them should have the same values, otherwise one of them will be applied to all of that topic's listeners and the other annotations' values will be ignored.
+* if MULTIPLE `@KafkaListener` annotations | SAME topic
+    ** ⚠️MULTIPLE `@RetryableTopic` | SAME topic, NOT recommended ⚠️
+        *** if you want to use it -> ALL of them should have the SAME values
+        *** Reason: 🧠conflicting retry configurations 🧠 ->
+            **** 1! will be applied
+            **** OTHER configurations will be ignored
+            **** NOT know which configuration wins
+    ** 💡recommended to use 1! `RetryTopicConfiguration` bean / configuration of such topics💡
 
 [[retry-topic-global-settings]]
 == Configuring Global Settings and Features
 
-Since 2.9, the previous bean overriding approach for configuring components has been removed (without deprecation, due to the aforementioned experimental nature of the API).
-This does not change the `RetryTopicConfiguration` beans approach - only infrastructure components' configurations.
-Now the `RetryTopicConfigurationSupport` class should be extended in a (single) `@Configuration` class, and the proper methods overridden.
-An example follows:
+* | v2.9-
+    ** add `RetryTopicComponentFactory` `@Bean`
+    ** _Example:_
++
+[source, java]
+----
+// OLD approach (NO longer supported)
+@Bean
+public RetryTopicComponentFactory retryFactory() {
+    // Override beans for configuration
+    return new CustomRetryTopicComponentFactory();
+}
 
+----
+
+* | v2.9
+    ** 's approach == `RetryTopicConfiguration` beans approach == ONLY infrastructure components' configurations
+    ** steps
+        *** `RetryTopicConfigurationSupport` class -- should be extended in a -- 1! `@Configuration` class
+        *** 👀override the proper `RetryTopicConfigurationSupport` 's methods 👀
+    ** _Example:_
++
 [source, java]
 ----
 
-@EnableKafka
+@EnableKafka    // WELL DONE!! NOT use @EnableKafkaRetryTopic
 @Configuration
 public class MyRetryTopicConfiguration extends RetryTopicConfigurationSupport {
 
@@ -179,17 +245,27 @@ public class MyRetryTopicConfiguration extends RetryTopicConfigurationSupport {
 }
 ----
 
-IMPORTANT: When using this configuration approach, the `@EnableKafkaRetryTopic` annotation should not be used to prevent context failing to start due to duplicated beans.
-Use the simple `@EnableKafka` annotation instead.
+    ** use `@EnableKafka`, ⚠️ NOT `@EnableKafkaRetryTopic` ⚠️
+        *** Reason: 🧠prevent context failing -- due to -- duplicated beans 🧠
 
-When `autoCreateTopics` is true, the main and retry topics will be created with the specified number of partitions and replication factor.
-Starting with version 3.0, the default replication factor is `-1`, meaning using the broker default.
-If your broker version is earlier than 2.4, you will need to set an explicit value.
-To override these values for a particular topic (e.g. the main topic or DLT), simply add a `NewTopic` `@Bean` with the required properties; that will override the auto creation properties.
+* if `autoCreateTopics=true` -> MAIN and RETRY topics -- will be created with the -- specified number of
+    ** partitions &
+    ** replication factor
 
-IMPORTANT: By default, records are published to the retry topic(s) using the original partition of the received record.
-If the retry topics have fewer partitions than the main topic, you should configure the framework appropriately; an example follows.
+* | v3.0,
+    ** default replication factor = `-1`
+        *** == broker default
+        *** 👀if your broker v2.4- -> you need to set an explicit value 👀
+    ** 👀if you want to override PREVIOUS DEFAULT values / particular topic -> add a `NewTopic` `@Bean` / required properties 👀
 
+* 👀by default, records -- are published, via the original partition of the received record, to the -- retry topic(s) 👀
+    ** ⚠️if the retry topics' # of partitions < main topic's # of partitions -> you should configure the framework appropriately ⚠️
+        *** == configure `RetryTopicConfigurationSupport.configureDeadLetterPublishingContainerFactory()`
+            **** allowed values to return
+                ***** specific partition number, or
+                ***** `null` == `KafkaProducer` -- should determine the -- partition
+        *** _Example:_
++
 [source, java]
 ----
 @EnableKafka
@@ -202,26 +278,26 @@ public class Config extends RetryTopicConfigurationSupport {
     }
 
     ...
-
 }
 ----
 
-The parameters to the function are the consumer record and the name of the next topic.
-You can return a specific partition number, or `null` to indicate that the `KafkaProducer` should determine the partition.
-
-By default, all values of retry headers (number of attempts, timestamps) are retained when a record transitions through the retry topics.
-Starting with version 2.9.6, if you want to retain just the last value of these headers, use the `configureDeadLetterPublishingContainerFactory()` method shown above to set the factory's `retainAllRetryHeaderValues` property to `false`.
+* 👀ALL retry headers (# of attempts, timestamps)' values 👀
+    ** by default, if a record -- transitions through the -- retry topics -> are retained
+    ** | v2.9.6
+        *** if you want to retain ONLY the LAST retry headers' value -> set `retainAllRetryHeaderValues=false` | `configureDeadLetterPublishingContainerFactory()` method
 
 [[find-retry-topic-config]]
 == Find RetryTopicConfiguration
-Attempts to provide an instance of `RetryTopicConfiguration` by either creating one from a `@RetryableTopic` annotation, or from the bean container if no annotation is available.
 
-If beans are found in the container, there's a check to determine whether the provided topics should be handled by any of such instances.
-
-If `@RetryableTopic` annotation is provided, a `DltHandler` annotated method is looked up.
-
-since 3.2, provide new API to Create `RetryTopicConfiguration` when `@RetryableTopic` annotated on a class:
-
+* ways to provide an instance of `RetryTopicConfiguration`
+    ** create one -- from a -- `@RetryableTopic` annotation
+        *** If `@RetryableTopic` annotation is provided -> a `DltHandler` annotated method is looked up
+    ** if NO annotation is available -> from the bean container
+        *** if beans are found | container -> you can determine whether the provided topics -- should be handled by -- ANY of such instances
+    ** | v3.2,
+        *** new API to Create `RetryTopicConfiguration` -- via -- `@RetryableTopic` | class
+            **** _Example:_
++
 [source, java]
 ----
 @Bean
