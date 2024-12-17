@@ -3,16 +3,13 @@ Spring for Apache Kafka
 [![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.spring.io/scans?search.rootProjectNames=spring-kafka)
 ==================
 
-# Code of Conduct
-
-Please see our [Code of conduct](https://github.com/spring-projects/.github/blob/master/CODE_OF_CONDUCT.md).
-
 # Reporting Security Vulnerabilities
 
-Please see our [Security policy](https://github.com/spring-projects/spring-kafka/security/policy).
+* see our [Security policy](https://github.com/spring-projects/spring-kafka/security/policy)
 
 # Checking out and Building
 
+* TODO:
 To check out the project and build from source, do the following:
 
     git clone git://github.com/spring-projects/spring-kafka.git
@@ -41,58 +38,40 @@ To build complete distribution including `-dist`, `-docs`, and `-schema` zip fil
 
 # Using Eclipse
 
-To generate Eclipse metadata (.classpath and .project files), do the following:
-
-    ./gradlew eclipse
-
-Once complete, you may then import the projects into Eclipse as usual:
-
- *File -> Import -> Existing projects into workspace*
-
-Browse to the *'spring-kafka'* root directory. All projects should import free of errors.
+* `./gradlew eclipse`
+  * generate Eclipse metadata (.classpath and .project files)
+* import them -- via -- *File -> Import -> Existing projects into workspace*
 
 # Using IntelliJ IDEA
 
-To generate IDEA metadata (.iml and .ipr files), do the following:
-
-    ./gradlew idea
-
-# Resources
-
-For more information, please visit the Spring Kafka website at:
-[Reference Manual](https://docs.spring.io/spring-kafka/reference/index.html)
+* `./gradlew idea`
+  * generate IDEA metadata (.iml and .ipr files)
 
 # Contributing to Spring Kafka
 
-Here are some ways for you to get involved in the community:
-
-* Get involved with the Spring community on the Spring Community Forums.  
-Please help out on the [StackOverflow](https://stackoverflow.com/questions/tagged/spring-kafka) by responding to questions and joining the debate.
-* Create [GitHub issues](https://github.com/spring-projects/spring-kafka/issues) for bugs and new features and comment and vote on the ones that you are interested in.
-* GitHub is for social coding: if you want to write code, we encourage contributions through pull requests from [forks of this repository](https://help.github.com/forking/).  
-If you want to contribute code this way, please reference a GitHub issue as well covering the specific issue you are addressing.
-* Watch for upcoming articles on Spring by [subscribing](https://www.springsource.org/node/feed) to springframework.org
-
-Before we accept a non-trivial patch or pull request we will need you to sign the [contributor's agreement](https://support.springsource.com/spring_committer_signup).
-Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do.
-Active contributors might be asked to join the core team and given the ability to merge pull requests.
+* Spring Community Forums
+* help out | [StackOverflow](https://stackoverflow.com/questions/tagged/spring-kafka)
+* Create [GitHub issues](https://github.com/spring-projects/spring-kafka/issues)
+* [subscribe here](https://www.springsource.org/node/feed)
 
 ## Code Conventions and Housekeeping
-None of these is essential for a pull request, but they will all help.
-They can also be added after the original pull request but before a merge.
 
-* Use the Spring Framework code format conventions (import `eclipse-code-formatter.xml` from the root of the project if you are using Eclipse).
-* Make sure all new `.java` files to have a simple Javadoc class comment with at least an `@author` tag identifying you, and preferably at least a paragraph on what the class is for.
-* Add the ASF license header comment to all new `.java` files (copy from existing files in the project)
-* Add yourself as an `@author` to the `.java` files that you modify substantially (more than cosmetic changes).
-* Add some Javadocs and, if you change the namespace, some XSD doc elements.
-* A few unit tests would help a lot as well - someone has to do it.
-* If no-one else is using your branch, please rebase it against the current main (or another target branch in the main project).
+* Spring Framework code format conventions
+  * if you are using Eclipse -> import `eclipse-code-formatter.xml` | root of the project 
+* ALL new `.java` files -> MUST have
+  * simple Javadoc class comment / contains
+    * `@author` tag
+    * paragraph on what the class is for
+  * ASF license header comment
+* if you modify substantially (!= styling) `.java` files -> add you as `@author` 
+* if you change the namespace, some XSD doc elements -> add SOME Javadocs
+* add unit tests
 
 # Getting Support
-Use the [`spring-kafka` tag on Stack Overflow](https://stackoverflow.com/questions/tagged/spring-kafka) to ask questions; include code and configuration and clearly explain your problem, providing an [MCRE](https://stackoverflow.com/help/minimal-reproducible-example) if possible.
-[Commercial support](https://spring.io/support) is also available.
+* [`spring-kafka` tag | Stack Overflow](https://stackoverflow.com/questions/tagged/spring-kafka)
+  * provide an [MCRE](https://stackoverflow.com/help/minimal-reproducible-example)
+* [Commercial support](https://spring.io/support)
 
 # License
 
-Spring Kafka is released under the terms of the Apache Software License Version 2.0 (see LICENSE.txt).
+* Apache Software License Version 2.0 (see LICENSE.txt).
