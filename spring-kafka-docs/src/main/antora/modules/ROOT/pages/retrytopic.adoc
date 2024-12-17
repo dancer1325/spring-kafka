@@ -2,13 +2,20 @@
 = Non-Blocking Retries
 :page-section-summary-toc: 1
 
-Version 2.9 changed the mechanism to bootstrap infrastructure beans; see xref:retrytopic/retry-config.adoc[Configuration] for the two mechanisms that are now required to bootstrap the feature.
+* v2.9+
+    ** 👀mechanism to bootstrap infrastructure beans was changed == 2 mechanisms 👀
+        *** see xref:retrytopic/retry-config.adoc[Configuration]
 
-Achieving non-blocking retry / dlt functionality with Kafka usually requires setting up extra topics and creating and configuring the corresponding listeners.
-Since 2.7 Spring for Apache Kafka offers support for that via the `@RetryableTopic` annotation and `RetryTopicConfiguration` class to simplify that bootstrapping.
-
-Since 3.2, Spring for Apache Kafka supports non-blocking retries with xref:kafka/receiving-messages/class-level-kafkalistener.adoc[@KafkaListener on a Class].
-
-IMPORTANT: Non-blocking retries are not supported with xref:kafka/receiving-messages/listener-annotation.adoc#batch-listeners[Batch Listeners].
-
-IMPORTANT: Non-Blocking Retries cannot combine with xref:kafka/transactions.adoc#container-transaction-manager[Container Transactions].
+* non-blocking retry / dlt functionality with Kafka
+    ** requirements
+        *** setting up extra topics
+        *** creating and configuring the corresponding listeners
+    ** | Spring for Apache Kafka v2.7+,
+        *** support -- via --
+            **** `@RetryableTopic` annotation
+            **** `RetryTopicConfiguration` class / simplify that bootstrapping
+    ** | Spring for Apache Kafka v3.2+
+        *** supports non-blocking retries -- via -- xref:kafka/receiving-messages/class-level-kafkalistener.adoc[@KafkaListener | Class]
+    ** Non-blocking retries
+        *** ❌NOT supported with xref:kafka/receiving-messages/listener-annotation.adoc#batch-listeners[Batch Listeners] ❌
+        *** ❌can NOT be combined with xref:kafka/transactions.adoc#container-transaction-manager[Container Transactions] ❌
