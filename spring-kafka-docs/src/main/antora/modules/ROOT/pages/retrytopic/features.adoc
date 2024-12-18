@@ -65,15 +65,15 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, MyPojo> templa
     ** _Example:_ if `maxAttempts=4` -> there'll be the original attempt + 3 retries
 
 [[global-timeout]]
-== Global Timeout
+== Global Timeout | retrying processes
 
-* TODO:
-You can set the global timeout for the retrying process.
-If that time is reached, the next time the consumer throws an exception the message goes straight to the DLT, or just ends the processing if no DLT is available.
-
+* if that time is reached -> next time the consumer -- throws an -- exception /
+    ** message -- goes to the -- DLT, or
+    ** if NO DLT is available -> ends the processing
+* _Example:_
 [source, java]
 ----
-@RetryableTopic(backoff = @Backoff(2_000), timeout = 5_000)
+@RetryableTopic(backoff = @Backoff(2_000), timeout = 5_000)     // timeout  == global timeout
 @KafkaListener(topics = "my-annotated-topic")
 public void processMessage(MyPojo message) {
     // ... message processing
@@ -92,14 +92,15 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, MyPojo> templa
 }
 ----
 
-NOTE: The default is having no timeout set, which can also be achieved by providing -1 as the timout value.
+* by default, NO timeout == set `timeout=-1`
 
 [[retry-topic-ex-classifier]]
 == Exception Classifier
 
-You can specify which exceptions you want to retry on and which not to.
-You can also set it to traverse the causes to lookup nested exceptions.
+* allow
+    ** specifying which exceptions will be retried or NOT
 
+* _Example:_
 [source, java]
 ----
 @RetryableTopic(include = {MyRetryException.class, MyOtherRetryException.class}, traversingCauses = true)
@@ -108,7 +109,6 @@ public void processMessage(MyPojo message) {
     throw new RuntimeException(new MyRetryException()); // will retry
 }
 ----
-
 
 [source, java]
 ----
@@ -121,31 +121,25 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, MyOtherPojo> t
 }
 ----
 
-NOTE: The default behavior is retrying on all exceptions and not traversing causes.
+* 👀by default, retry ALL exceptions & NOT traversing causes 👀
 
-Since 2.8.3 there's a global list of fatal exceptions which will cause the record to be sent to the DLT without any retries.
-See xref:kafka/annotation-error-handling.adoc#default-eh[DefaultErrorHandler] for the default list of fatal exceptions.
-You can add or remove exceptions to and from this list by overriding the `configureNonBlockingRetries` method in a `@Configuration` class that extends `RetryTopicConfigurationSupport`.
-See xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings and Features] for more information.
-
-[source, java]
-----
-
-@Override
-protected void manageNonBlockingFatalExceptions(List<Class<? extends Throwable>> nonBlockingFatalExceptions) {
-    nonBlockingFatalExceptions.add(MyNonBlockingException.class);
-}
-
-----
-
-NOTE: To disable fatal exceptions' classification, just clear the provided list.
-
+* | v2.8.3
+    ** ⚠️EXIST global list of fatal exceptions / record -- will be sent, WITHOUT any retries, to the -- DLT ⚠️
+        *** see xref:kafka/annotation-error-handling.adoc#default-eh[DefaultErrorHandler]
+        *** if you want to customize (== add or remove exceptions | this list) -> override the `configureNonBlockingRetries` method | `@Configuration` class / extends `RetryTopicConfigurationSupport`
+            **** see xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings and Features]
 
 [[include-and-exclude-topics]]
 == Include and Exclude Topics
 
-You can decide which topics will and will not be handled by a `RetryTopicConfiguration` bean via the .includeTopic(String topic), .includeTopics(Collection<String> topics) .excludeTopic(String topic) and .excludeTopics(Collection<String> topics) methods.
-
+* `RetryTopicConfiguration` bean
+    ** 👀by default, ALL topics are included 👀
+    ** `.includeTopic(String topic)` & `.includeTopics(Collection<String> topics)`
+        *** specify topics / will be handled
+    ** `.excludeTopic(String topic)` & `.excludeTopics(Collection<String> topics)`
+        *** specify topics / will NOT be handled
+    ** _Example:_
++
 [source, java]
 ----
 @Bean
@@ -165,13 +159,10 @@ public RetryTopicConfiguration myOtherRetryTopic(KafkaTemplate<Integer, MyPojo> 
 }
 ----
 
-NOTE: The default behavior is to include all topics.
-
-
 [[topics-autocreation]]
 == Topics AutoCreation
 
-* framework -- will auto create, via `NewTopic` beans / consumed by the `KafkaAdmin` bean, -- the required topics
+* 💡framework -- will auto create, via `NewTopic` beans / consumed by the `KafkaAdmin` bean, -- the required topics 💡
     ** you can
         *** specify the
             **** # of partitions
@@ -225,18 +216,18 @@ public RetryTopicConfiguration myOtherRetryTopic(KafkaTemplate<Integer, MyPojo> 
 [[retry-headers]]
 == Failure Header Management
 
-When considering how to manage failure headers (original headers and exception headers), the framework delegates to the `DeadLetterPublishingRecoverer` to decide whether to append or replace the headers.
-
-By default, it explicitly sets `appendOriginalHeaders` to `false` and leaves `stripPreviousExceptionHeaders` to the default used by the `DeadLetterPublishingRecover`.
-
-This means that only the first "original" and last exception headers are retained with the default configuration.
-This is to avoid creation of excessively large messages (due to the stack trace header, for example) when many retry steps are involved.
-
-See xref:kafka/annotation-error-handling.adoc#dlpr-headers[Managing Dead Letter Record Headers] for more information.
-
-To reconfigure the framework to use different settings for these properties, configure a `DeadLetterPublishingRecoverer` customizer by overriding the `configureCustomizers` method in a `@Configuration` class that extends `RetryTopicConfigurationSupport`.
-See xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings and Features] for more details.
-
+* `DeadLetterPublishingRecoverer`
+    ** allows
+        *** managing failure headers (original headers & exception headers)
+            **** _Example:_ append or replace the headers
+    ** by default,
+        *** `appendOriginalHeaders=false`
+            **** 👀-> ONLY the FIRST "original" and LAST exception headers are retained 👀
+                ***** Reason: 🧠 avoid creating excessively large messages | MANY retry steps are involved 🧠
+        *** `stripPreviousExceptionHeaders` == default / used by the `DeadLetterPublishingRecover`
+    ** if you want to customize -> override the `configureCustomizers` method | `@Configuration` class / extends `RetryTopicConfigurationSupport`
+        *** _Example:_
++
 [source, java]
 ----
 @Override
@@ -247,19 +238,33 @@ protected void configureCustomizers(CustomizersConfigurer customizersConfigurer)
     });
 }
 ----
+    ** if you want to add custom headers
+        *** | v2.8.4,  -> `factory.setHeadersFunction((rec, ex) +++->+++ { +++...+++ })`
+        *** | v2.9.5, if the `Headers` / returned by the function contains a header of type `DeadLetterPublishingRecoverer.SingleRecordHeader` ->
+            **** ANY existing header's value will be removed
+            **** ONLY the NEW single value will remain
+    ** see
+        *** xref:kafka/annotation-error-handling.adoc#dlpr-headers[Managing Dead Letter Record Headers]
+        *** xref:retrytopic/retry-config.adoc#retry-topic-global-settings[Configuring Global Settings and Features]
 
-Starting with version 2.8.4, if you wish to add custom headers (in addition to the retry information headers added by the factory, you can add a `headersFunction` to the factory - `factory.setHeadersFunction((rec, ex) +++->+++ { +++...+++ })`.
-
-By default, any headers added will be cumulative - Kafka headers can contain multiple values.
-Starting with version 2.9.5, if the `Headers` returned by the function contains a header of type `DeadLetterPublishingRecoverer.SingleRecordHeader`, then any existing values for that header will be removed and only the new single value will remain.
+* Kafka headers
+    ** can contain MULTIPLE values
 
 [[custom-dlpr]]
 == Custom DeadLetterPublishingRecoverer
 
-As can be seen in xref:retrytopic/features.adoc#retry-headers[Failure Header Management] it is possible to customize the default `DeadLetterPublishingRecoverer` instances created by the framework.
-However, for some use cases, it is necessary to subclass the `DeadLetterPublishingRecoverer`, for example to override `createProducerRecord()` to modify the contents sent to the retry (or dead-letter) topics.
-Starting with version 3.0.9, you can override the `RetryConfigurationSupport.configureDeadLetterPublishingContainerFactory()` method to provide a `DeadLetterPublisherCreator` instance, for example:
+* you can customize the default `DeadLetterPublishingRecoverer` instances / created by the framework
+    ** see xref:retrytopic/features.adoc#retry-headers[Failure Header Management]
+    ** | SOME use cases, you need subclass the `DeadLetterPublishingRecoverer`
+        *** _Example:_ override `createProducerRecord()` / modify the contents -- sent to the -- retry (or dead-letter) topics
 
+* | v3.0.9,
+    ** if you want to create a `DeadLetterPublisherCreator` instance -> override the `RetryConfigurationSupport.configureDeadLetterPublishingContainerFactory
+()`
+        *** recommendations
+            **** use the provided resolvers | constructing the custom instance
+        *** _Example:_
++
 [source, java]
 ----
 @Override
@@ -272,23 +277,21 @@ protected Consumer<DeadLetterPublishingRecovererFactory>
 }
 ----
 
-It is recommended that you use the provided resolvers when constructing the custom instance.
-
 [[exc-based-custom-dlt-routing]]
-== Routing of messages to custom DLTs based on thrown exceptions
+== Route messages -- based on thrown exceptions, to -- custom DLTs
 
-Starting with version 3.2.0, it's possible to route messages to custom DLTs based on the type of the exception, which has been thrown during their processing.
-In order to do that, there's a need to specify the routing.
-Routing customization consists of the specification of the additional destinations.
-Destinations in turn consist of two settings: the `suffix` and `exceptions`.
-When the exception type specified in `exceptions` has been thrown, the DLT containing the `suffix` will be considered as the target topic for the message before the general purpose DLT is considered.
-Examples of configuration using either annotations or `RetryTopicConfiguration` beans:
-
+* | v3.2.0,
+    ** 👀you can route messages -- ,based on the type of the exception, to -- custom DLTs 👀
+        *** requirements: specify the routing
+        *** rules / followed == rules / followed by xref:retrytopic/features.adoc#topics-autocreation[Topics AutoCreation]
+        *** _Examples of configuring:_
+            **** _Example1:_ via annotations
++
 [source, java]
 ----
 @RetryableTopic(exceptionBasedDltRouting = {
     @ExceptionBasedDltDestination(
-        suffix = "-deserialization", exceptions = {DeserializationException.class}
+        suffix = "-deserialization", exceptions = {DeserializationException.class}  // -> `my-annotated-topic-deserialization-dlt`
     )}
 )
 @KafkaListener(topics = "my-annotated-topic")
@@ -297,6 +300,8 @@ public void processMessage(MyPojo message) {
 }
 ----
 
+            **** _Example2:_ via `RetryTopicConfiguration` beans
++
 [source, java]
 ----
 @Bean
@@ -309,6 +314,9 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, MyPojo> templa
 }
 ----
 
-`suffix` takes place before the general `dltTopicSuffix` in the custom DLT name.
-Considering presented examples, the message, which caused the `DeserializationException` will be routed to the `my-annotated-topic-deserialization-dlt` instead of the `my-annotated-topic-dlt`.
-Custom DLTs will be created following the same rules as stated in the xref:retrytopic/features.adoc#topics-autocreation[Topics AutoCreation].
+* Routing customization
+    ** == specify additional destinations
+
+* Destinations == `suffix` & `exceptions`
+    ** `suffix` -- is used to identify the -- custom DLT
+        *** 👀if NO match found -> message -- is routed to the -- general purpose DLT 👀
