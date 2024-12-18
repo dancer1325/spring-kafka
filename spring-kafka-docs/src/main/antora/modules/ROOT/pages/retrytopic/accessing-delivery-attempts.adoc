@@ -1,20 +1,26 @@
 [[accessing-delivery-attempts]]
 = Accessing Delivery Attempts
 
-To access blocking and non-blocking delivery attempts, add these headers to your `@KafkaListener` method signature:
-
+* 👀if you want to access blocking & non-blocking delivery attempts ->
+    ** add these headers | your `@KafkaListener` method 👀
+        *** requirements
+            **** | blocking delivery attempts, set `ContainerProperties=true`
+                ***** see xref:kafka/container-props.adoc#deliveryAttemptHeader[deliveryAttemptHeader]
+        *** | initial delivery, NON blocking attempts == `null`
+        *** _Example:_
++
 [source, java]
 ----
 @Header(KafkaHeaders.DELIVERY_ATTEMPT) int blockingAttempts,
 @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer nonBlockingAttempts
 ----
-
-Blocking delivery attempts are only provided if you set `ContainerProperties`+++'+++s xref:kafka/container-props.adoc#deliveryAttemptHeader[deliveryAttemptHeader] to `true`.
-
-Note that the non blocking attempts will be `null` for the initial delivery.
-
-Starting with version 3.0.10, a convenient `KafkaMessageHeaderAccessor` is provided to allow simpler access to these headers; the accessor can be provided as a parameter for the listener method:
-
+    ** | v3.0.10,
+        *** use `KafkaMessageHeaderAccessor` -- as a -- listener method's parameter
+            **** if you want to get the values -> use `accessor.getBlockingRetryDeliveryAttempt()` & `accessor.getNonBlockingRetryDeliveryAttempt()`
+                ***** & blocking retries are NOT enabled -> throw an `IllegalStateException`
+                ***** & non-blocking retries are NOT enabled -> returns `1` | initial delivery
+            **** _Example:_
++
 [souce, java]
 ----
 @RetryableTopic(backoff = @Backoff(...))
@@ -23,7 +29,3 @@ void listen(Thing thing, KafkaMessageHeaderAccessor accessor) {
     ...
 }
 ----
-
-Use `accessor.getBlockingRetryDeliveryAttempt()` and `accessor.getNonBlockingRetryDeliveryAttempt()` to get the values.
-The accessor will throw an `IllegalStateException` if blocking retries are not enabled; for non-blocking retries, the accessor returns `1` for the initial delivery.
-
