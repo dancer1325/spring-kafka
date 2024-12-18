@@ -1,9 +1,15 @@
 [[programmatic-construction]]
 = Programmatic Construction
 
-The feature is designed to be used with `@KafkaListener`; however, several users have requested information on how to configure non-blocking retries programmatically.
-The following Spring Boot application provides an example of how to do so.
+* uses
+    ** + `@KafkaListener`
+* requirements that Kafka AUTO create the topics
+    ** configuration is processed BEFORE the application context is refreshed
+        *** Reason: 🧠Spring Context lifecycle (1. Configuration classes processed, 2. Beans created, 3. Context refreshed) 🧠
+* if you want to configure containers | runtime -> topics will need to be created -- via -- OTHER technique (manually or another method)
 
+* _Example:_ how to configure non-blocking retries programmatically | Spring Boot application
++
 [source, java]
 ----
 @SpringBootApplication
@@ -83,7 +89,3 @@ class Listener implements MessageListener<String, String> {
 
 }
 ----
-
-IMPORTANT: Auto creation of topics will only occur if the configuration is processed before the application context is refreshed, as in the above example.
-To configure containers at runtime, the topics will need to be created using some other technique.
-
