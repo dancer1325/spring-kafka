@@ -8,19 +8,12 @@
 [[backoff-configuration]]
 == BackOff Configuration
 
-* -- relies on the -- `Spring Retry` project's `BackOffPolicy` interface / includes
+* 👀-- relies on the -- `Spring Retry` project's `BackOffPolicy` interface 👀/ includes
     ** Fixed Back Off
         *** `FixedBackOffPolicy`
         *** default one -- `FixedBackOffPolicy` / 3 maximum retries & 1000ms intervals
-    ** Exponential Back Off
-        *** `ExponentialBackOffPolicy`
-        *** 30-second default maximum delay
-            **** if you need other -> adjust `maxDelay`
-    ** Random Exponential Back Off
-    ** Uniform Random Back Off
-    ** No Back Off
-    ** Custom Back Off
-
+        *** _Example:_
++
 [source, java]
 ----
 @RetryableTopic(attempts = 5,
@@ -30,7 +23,7 @@ public void processMessage(MyPojo message) {
     // ... message processing
 }
 ----
-
++
 [source, java]
 ----
 @Bean
@@ -42,9 +35,20 @@ public RetryTopicConfiguration myRetryTopic(KafkaTemplate<String, MyPojo> templa
             .create(template);
 }
 ----
+    ** Exponential Back Off
+        *** `ExponentialBackOffPolicy`
+        *** 30-second default maximum delay
+            **** if you need other -> adjust `maxDelay`
+    ** Random Exponential Back Off
+    ** Uniform Random Back Off
+    ** No Back Off
+    ** Custom Back Off
 
-* possible to customize implementation of Spring Retry's `SleepingBackOffPolicy` interface
 
+
+* `SleepingBackOffPolicy`
+    ** if you want to customize -> implement it
++
 [source, java]
 ----
 @Bean
